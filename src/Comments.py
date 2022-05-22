@@ -1,46 +1,49 @@
 import string
 import os
+import Temp_Files
 
-def delete_comments(path, file_name):
-    with open(path + file_name, "r") as file_input:
+def delete_comments(lang, path):
+    with open(path + lang.file_name, "r") as file_input:
+        # Creates the temp_files/ dir if it doesn't exist
         try:
             os.mkdir("temp_files/")
         except FileExistsError:
             pass
-        with open("temp_files/nc_"+file_name, "w") as output:
+
+        with open(Temp_Files.NO_COMMENTS + lang.file_name, "w") as output:
 
             multiline_comment = False
 
             for line in file_input:
                 line = line.strip()
                 #Delete comments
-                multiline_comment, line = _delete_multiline_comment(line, multiline_comment)
-                line = _delete_inline_comment(line)
+                multiline_comment, line = _delete_multiline_comment(line, multiline_comment, lang)
+                line = _delete_inline_comment(line, lang)
                 #if line is not empty we write it onto the file
                 if line:
                     output.write(line + '\n')
 
-def _delete_inline_comment(line) -> string:
+def _delete_inline_comment(line, lang) -> string:
     '''
     Deeletes an inline comment introduced by // and returns the decommented string
     '''
 
-    if "//" in line:
-        comment_index = line.index("//")
+    if lang.inline_comment_symbol in line:
+        comment_index = line.index(lang.inline_comment_symbol)
         #inside è un booleano e indica se il commento è dentro le virgolette o no
-        (inside, index_closedquotes) = _is_inside_string(line, comment_index)
+        (inside, index_closedquotes) = _is_inside_string(line, comment_index, lang)
 
         #If it's not inside quotes then we simply delete the comment
         if not inside:
             line = line[: comment_index]
         #If it's inside quotes then the '//' that we found is not a comment, but there can be another comment in this line
         else:
-            line = line[: index_closedquotes + 1] + _delete_inline_comment(line[index_closedquotes + 1: ])
+            line = line[: index_closedquotes + 1] + _delete_inline_comment(line[index_closedquotes + 1: ], lang)
         
     return line
 
 #Returns (multiline_comment, line_without_comment)
-def _delete_multiline_comment(line, multiline_comment) -> tuple:
+def _delete_multiline_comment(line, multiline_comment, lang) -> tuple:
     '''
     Deletes a commented part of the line in a multiline comment context
     '''
@@ -49,7 +52,7 @@ def _delete_multiline_comment(line, multiline_comment) -> tuple:
     #that means that if in the line before there was a /* without a closing */ multiline_comment = True
     if multiline_comment:
         # If there is a closing comment */ in this line we delete all the chars until line[line.index("*/") + 1]
-        if "*/" in line:
+        if lang.multiline_comment_closing_symbol in line:
             line = line[line.index("*/") + 2:]
             multiline_comment = False
         # else, if there is no closing comment expression: */ we delete the whole line
@@ -58,16 +61,16 @@ def _delete_multiline_comment(line, multiline_comment) -> tuple:
     else:
         # If we havent't found a /* yet (multiline_comment = false) we see if there is a /* in the current line
         if "/*" in line:
-            comment_index = line.index("/*")
+            comment_index = line.index(lang.multiline_comment_opening_symbol)
             
             # We see whether the /* which we found is inside double quotes or not
-            (inside, index_closedquotes) = _is_inside_string(line, comment_index)
+            (inside, index_closedquotes) = _is_inside_string(line, comment_index, lang)
 
             # If it is inside we still have to check the rest of the line:
             # maybe there is a multiline comment later in the line
             if inside:
                 # we call delete_multiline_comment recoursively from the index of the closing quotes + 1 until the end of the line
-                multiline_comment, rest = _delete_multiline_comment(line[index_closedquotes + 1: ], False)
+                multiline_comment, rest = _delete_multiline_comment(line[index_closedquotes + 1: ], False, lang)
                 line = line[ : index_closedquotes + 1] + rest
             else:
                 # If the /* expression that we found is not inside a string ("/*" <-- like this) we still have to check
@@ -85,15 +88,15 @@ def _delete_multiline_comment(line, multiline_comment) -> tuple:
                 #
                 # If our /* is not inside an inline comment, we have to verify if it closes in the same line (/*.....*/ <-- like this)
                 # (so multiline_comment will still be False) or if it actually is a multiline comment.
-                if line[: comment_index] == _delete_inline_comment(line[: comment_index]):
+                if line[: comment_index] == _delete_inline_comment(line[: comment_index], lang):
                     try:
-                        closing_comment_index = line[comment_index: ].index("*/")
+                        closing_comment_index = line[comment_index: ].index(lang.multiline_comment_closing_symbol)
                         # We remove the comment "inline" /*...*/ comment, but maybe later in the line there is a multiline comment
                         # We call delete_multiline_comment recoursively giving as parameter the same "line" but without the inline /*...*/ comment
                         # that we've just deleted 
                         # +2 means we include (to delete) the comment expression characters
                         line = line[: comment_index] + line[comment_index + closing_comment_index + 2: ]
-                        return _delete_multiline_comment(line, False)
+                        return _delete_multiline_comment(line, False, lang)
                     except ValueError:
                         #if there's no */ inside this line we have a multiline_comment, we just delete everything after and included /*
                         return (True, line[: comment_index])
@@ -105,7 +108,7 @@ def _delete_multiline_comment(line, multiline_comment) -> tuple:
     return (multiline_comment, line)
 
 # Returns (result, match)
-def _is_inside_string(line, index) -> tuple:
+def _is_inside_string(line, index, lang) -> tuple:
     '''
     Returns if specified index is inside a string, if True, returns index_match
     '''
@@ -115,8 +118,8 @@ def _is_inside_string(line, index) -> tuple:
 
         # If the \" we've found is a single independent quote, like: \" we skip
         # and try to see if there are other strings later in the line where index could be or not inside
-        if index_quotes != 0 and line[index_quotes - 1] == '\\':
-            return _is_inside_string(line[index_quotes + 1: ], index - (index_quotes + 1))
+        if index_quotes != 0 and line[index_quotes - 1] == lang.inline_comment_symbol:
+            return _is_inside_string(line[index_quotes + 1: ], index - (index_quotes + 1), lang)
 
         index_match = find_match_quotes(line, index_quotes)
 
@@ -130,7 +133,7 @@ def _is_inside_string(line, index) -> tuple:
             return (True, index_match)
         else:
             len_first_substring  = index_match + 1
-            (result, match) = _is_inside_string(line[index_match + 1 : ], index - len_first_substring)
+            (result, match) = _is_inside_string(line[index_match + 1 : ], index - len_first_substring, lang)
             return (result, match + len_first_substring)
     else:
         return (False, 0)

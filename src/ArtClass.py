@@ -1,16 +1,13 @@
 import Image_Handler
-import Comments
-import Format
-import Preprocessor
+import Language
 
 import sys
 
 def main(cpp_path = "test.cpp", img_file_name = "test.png"):
     black_white_img = Image_Handler.black_and_white(img_file_name)
     path, cpp_file_name = separate_path_from_filename(cpp_path)
-    Comments.delete_comments(path, cpp_file_name)
-    header = Preprocessor.retrieve_preprocessor_directives(cpp_file_name)
-    Format.format_file(path, cpp_file_name, black_white_img, header)
+    lang = Language.Cpp(cpp_file_name)
+    lang.format(path, black_white_img)
 
 def separate_path_from_filename(cpp_path):
     '''
@@ -25,7 +22,7 @@ def separate_path_from_filename(cpp_path):
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
-        main(cpp_path=sys.argv[1], img_file_name=sys.argv[2])
+        main(cpp_path = sys.argv[1], img_file_name = sys.argv[2])
     else:
         cpp_path = input("Specify the .cpp file to modify: ")
         img_file_name = input("Specify the image file: ")
