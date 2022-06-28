@@ -157,12 +157,13 @@ def _final_text(input_file, out_file, tokens_to_write, lang):
         out_file.write(out_string + '\n')
 
 def _handle_line(line, lang):
-    # Sobstitute the '\n' at the end of the string witha space if the last characters represent a keyword to avoid the concatenation of 
+    # Sobstitute the '\n' at the end of the string with a space if the last characters represent a keyword to avoid the concatenation of 
     # what should be different tokens
     # THIS HAS TO BE MODIFIED BECAUSE IF THE LAST CHARACTERS ARE INSIDE OF A STRING (IT HAS TO BE A MULTILINE STRING NECESSARILY) THEN IT SHOULD
     # NOT ADD A SPACE
     if any([keyword + '\n' in line for keyword in lang.keywords]):
-        line[-1] = ' '
+        line = line[: -1]
+        line = line + ' '
 
     #Delete trailing spaces and \n
     line = line.strip('\n')
@@ -253,18 +254,6 @@ def _separate_img(img, row):
 
     return (n_of_black_pixels, black_list, white_list)
 
-#Sometimes it happens that when we have an else statement with only one instruction we write code like the following:
-#else
-#   statement ...
-#This can lead to an error in the output code, where we have: elsestatement...
-#To avoid this, we put a blank space after the else
-#def _handle_keywords(line):
-    # DA MODIFICARE: VISITA DAL FONDO DELLA STRINGA E CERCO IN KEYWORDS
-#    if "else\n" in line:
-#        idx = line.index("else")
-#        line = line[ :idx + 4] + ' ' + line[idx + 4: ]
-#    return line
-
 def _format_out_string(not_filled_spaces, num_token_segment, tot_chars_to_write, tokens_to_write):
 
     '''
@@ -335,8 +324,8 @@ def _tokenize_string(str, lang):
         token_char_counter = 1
         #Check if we have a format specifier
         if str[0] == '%':
-            while(str[counter_char] in lang.format_specifiers):
-                counter_char += 1
+            while(str[token_char_counter] in lang.format_specifiers):
+                token_char_counter += 1
         #Check if we have an escape sequence
         elif str[0] == '\\':
             token_char_counter = 2

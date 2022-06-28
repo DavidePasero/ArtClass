@@ -66,25 +66,24 @@ class Language:
     def handle_multiline_strings(self, str: string)->list:
         pass
     
-    # Method that actually performs all the operation are needed
+    # This is the method that actually formats the file: 
+    # it executes all the necessary operations that are needed for the files written in the current language
     @abstractmethod
     def format(self):
         pass
 
-class Cpp(Language):
-
+class C(Language):
     output_file_name = Temp_Files.NO_PREPROCESSOR
 
     operators = [
-    '<=>', '<<=', '>>=', '->*',
-    '==', '!=', '++', '--', '+=', '-=', '*=', '/=', '%=', '>>', '>=', '<<', '<=', '||', '|=', '&&', '&=', '^=', '~=', '::', '.*'
+    '<<=', '>>=',
+    '==', '!=', '++', '--', '+=', '-=', '*=', '/=', '%=', '>>', '>=', '<<', '<=', '||', '|=', '&&', '&=', '^=', '~=',
     '=', '!', '+', '-', '*', '/', '%', '>', '<', '|', '&', '^', ':', ' ', '(', ')', '[', ']', '{', '}', ';', ',', '?']
 
-    keywords = ["auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "int", 
-                "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while", # C keywords"asm", "dynamic_cast", "namespace", "reinterpret_cast", "bool", "explicit", "new", "static_cast", "false", "catch"
-                "operator", "template", "friend", "private", "class", "this", "inline", "public", "throw", "const_cast"
-                "delete", "mutable", "protected", "true", "try", "typeid", "typename", "using", "virtual", "wchar_t"
-                ]
+    keywords = [
+        "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "int", 
+        "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while" # C keywords"asm", "dynamic_cast", "namespace", "reinterpret_cast", "bool", "explicit", "new", "static_cast", "false", "catch"
+        ]
 
     format_specifiers = ['c', 's', 'd', 'i', 'o', 'x', 'X', 'u', 'f', 'F', 'e', 'E', 'a', 'A', 'g', 'G', 'n', 'p']
 
@@ -94,7 +93,7 @@ class Cpp(Language):
 
     multiline_comment_closing_symbol = '*/'
 
-    # In C++, to create multiline strings we only need to add the closing and opening quotes between a string:
+    # In C-C++, to create multiline strings we only need to add the closing and opening quotes between a string:
     # Example: "Hello" is equal to "Hel"   "lo".
     # The numbers of chars to add is 2 because of the 2 opening and closing quotes
     num_chars_to_add_to_multiline_strings = 2
@@ -116,7 +115,21 @@ class Cpp(Language):
         # and the second one which will be written later
         return [str[: char_counter] + '\"', '\"' + str[char_counter: ]]
     
-    def format(self, path, bw_img) -> list:
+    def format(self, path, bw_img):
         Comments.delete_comments(self, path)
         prepr_instructions = Preprocessor.retrieve_preprocessor_directives(self)
         Format.format_file(self, prepr_instructions, path, bw_img)
+
+class Cpp(C):
+
+    output_file_name = Temp_Files.NO_PREPROCESSOR
+
+    operators = [
+    '<=>', '<<=', '>>=', '->*',
+    '==', '!=', '++', '--', '+=', '-=', '*=', '/=', '%=', '>>', '>=', '<<', '<=', '||', '|=', '&&', '&=', '^=', '~=', '::', '.*'
+    '=', '!', '+', '-', '*', '/', '%', '>', '<', '|', '&', '^', ':', ' ', '(', ')', '[', ']', '{', '}', ';', ',', '?']
+
+    keywords = ["auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "int", 
+                "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while", # C keywords"asm", "dynamic_cast", "namespace", "reinterpret_cast", "bool", "explicit", "new", "static_cast", "false", "catch"
+                "operator", "template", "friend", "private", "class", "this", "inline", "public", "throw", "const_cast"
+                "delete", "mutable", "protected", "true", "try", "typeid", "typename", "using", "virtual", "wchar_t"]

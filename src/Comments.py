@@ -53,14 +53,14 @@ def _delete_multiline_comment(line, multiline_comment, lang) -> tuple:
     if multiline_comment:
         # If there is a closing comment */ in this line we delete all the chars until line[line.index("*/") + 1]
         if lang.multiline_comment_closing_symbol in line:
-            line = line[line.index("*/") + 2:]
+            line = line[line.index(lang.multiline_comment_closing_symbol) + 2:]
             multiline_comment = False
         # else, if there is no closing comment expression: */ we delete the whole line
         else:
             line = ""
     else:
         # If we havent't found a /* yet (multiline_comment = false) we see if there is a /* in the current line
-        if "/*" in line:
+        if lang.multiline_comment_opening_symbol in line:
             comment_index = line.index(lang.multiline_comment_opening_symbol)
             
             # We see whether the /* which we found is inside double quotes or not

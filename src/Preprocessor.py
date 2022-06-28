@@ -7,7 +7,6 @@ import Temp_Files
 def retrieve_preprocessor_directives(lang):
         with open(Temp_Files.NO_COMMENTS + lang.file_name, mode = 'r') as input:
             with open(Temp_Files.NO_PREPROCESSOR + lang.file_name, mode = 'w') as output:
-                print(Temp_Files.NO_PREPROCESSOR + lang.file_name)
                 preprocessor_directives = []
                 multiline_preprocessor = False
 
