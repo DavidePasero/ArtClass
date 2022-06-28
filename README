@@ -1,5 +1,5 @@
 README:
-ArtClass is the worst weapon ever created in the history of programming.
+ArtClass is the most lethal weapon ever created in the history of programming.
 It is a tool written in Python 3 that allows you to format your source code in a very artistic way.
 Basically, you execute ArtClass.py specifying an error-free source code file of a supported language and a square-black-and-white image and the program will output the c++ code formatted in a way that resembles the input image.
 Of course, the outputted source code will still be error-free.
