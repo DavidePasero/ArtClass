@@ -1,0 +1,15 @@
+README:
+ArtClass is the worst weapon ever created in the history of programming.
+It is a tool written in Python 3 that allows you to format your source code in a very artistic way.
+Basically, you execute ArtClass.py specifying an error-free source code file of a supported language and a square-black-and-white image and the program will output the c++ code formatted in a way that resembles the input image.
+Of course, the outputted source code will still be error-free.
+
+How to execute ArtClass:
+Since it's a python3 program, you can execute ArtClass with the following command:
+python3 ArtClass.py
+
+If you want, you can specify the source code file and the image file as parameters in the execution command, like in the following example:
+python3 ArtClass.py path_to_source_code_file/test.cpp path_to_img/test.png
+
+Otherwise, when you start the program you'll be asked to provide these two files. Remember to always specify the absolute path.
+The outputted file will be created in the folder where the source code file is stored.
