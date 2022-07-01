@@ -2,6 +2,7 @@ import Image_Handler
 import Language
 
 import sys
+import platform
 
 def main(complete_path, img_file_name):
     black_white_img = Image_Handler.black_and_white(img_file_name)
@@ -14,7 +15,10 @@ def separate_path_from_filename(path):
     Returns (path, file_name)
     '''
     try:
-        last_slash_index = path.rindex('/')
+        if platform.system() == 'Windows':
+            last_slash_index = path.rindex('\\')
+        else:
+            last_slash_index = path.rindex('/')
         return (path[: last_slash_index + 1], path[last_slash_index + 1: ])
     except ValueError:
         print("You're not allowed to specify a relative path")
